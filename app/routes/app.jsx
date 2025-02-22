@@ -23,6 +23,9 @@ export default function App() {
           Home
         </Link>
         <Link to="/app/additional">Additional page</Link>
+        <Link to="/app/author">Author page</Link>
+        <Link to="/app/login">Login page</Link>
+        <Link to="/app/book/new">Add Book</Link>
       </NavMenu>
       <Outlet />
     </AppProvider>
