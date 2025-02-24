@@ -18,21 +18,9 @@ export const loader = async ({ params }) => {
   });
   if (!booksResponse.ok) throw new Error("Books not found");
 
-  // const [author, books] = await Promise.all([authorResponse.json(), booksResponse.json()]);
-  // return json({ author, books });
-  // const [books] = await Promise.all([booksResponse.json()]);
   const books = await booksResponse.json();
   return books;
 };
-
-// Static dataset (replace this with your actual data)
-// const staticBooks = [
-//   { title: "Book 1", genre: "fiction", publicationYear: 2020 },
-//   { title: "Book 2", genre: "non-fiction", publicationYear: 2019 },
-//   { title: "Book 3", genre: "fiction", publicationYear: 2021 },
-//   { title: "Book 4", genre: "non-fiction", publicationYear: 2018 },
-//   { title: "Book 5", genre: "fiction", publicationYear: 2022 },
-// ];
 
 export default function Books() {
   const books = useLoaderData();

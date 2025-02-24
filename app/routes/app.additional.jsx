@@ -3,151 +3,136 @@ import {
   Card,
   FormLayout,
   TextField,
-  Select,
   Button,
+  Banner,
 } from "@shopify/polaris";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useActionData } from "@remix-run/react";
 import { json, redirect } from "@remix-run/node";
 import { useState } from "react";
-import { title } from "process";
+import { createCookieSessionStorage } from "@remix-run/node";
 
-// Loader function to fetch book details
-export const loader = async ({ params }) => {
-  const response = await fetch(`https://candidate-testing.api.royal-apps.io/api/v2/books/1034`, {
-    headers: { Authorization: `Bearer e1ea929642a5215f004ce10e612e71722cec8022d5e6afca37af5c56442634e3768a11c9ce047765` },
-  });
-  const book = await response.json();
-  return json({ book });
-};
+// Create session storage for managing cookies
+const sessionStorage = createCookieSessionStorage({
+  cookie: {
+    name: "session",
+    secure: process.env.NODE_ENV === "production", // Only set to true in production (HTTPS)
+    secrets: ["your-secret-key"], // Replace with a real secret key
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7, // 1 week
+    httpOnly: true,
+  },
+});
 
-// Action function to handle book updates
-export const action = async ({ request, params }) => {
-  const formData = await request.formData();
-  const authorId = formData.get("authorId");
-  const title = formData.get("title");
-  const description = formData.get("description");
-  const isbn = formData.get("isbn");
-  const publicationYear = formData.get("publicationYear");
-  const format = formData.get("format");
+// Loader function to check if the user is already logged in
+export async function loader({ request }) {
+  const session = await sessionStorage.getSession(
+    request.headers.get("Cookie")
+  );
 
-  const response = await fetch(`https://candidate-testing.api.royal-apps.io/api/v2/books/1034`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer e1ea929642a5215f004ce10e612e71722cec8022d5e6afca37af5c56442634e3768a11c9ce047765` },
-    body: JSON.stringify({
-      // author: { id: authorId },
-      title,
-      release_date: publicationYear,
-      description,
-      isbn,
-      format,
-    }),
-  });
+  const token = session.get("token");
 
-  if (!response.ok) {
-    return json({ error: "Failed to update book" }, { status: 500 });
+  console.log("Token from session:", token); // Debugging: Log the token
+
+  // If the user has a token, redirect them to the dashboard
+  if (token) {
+    return redirect("/app");
   }
 
-  return redirect(`/app/authors/1034`);
-  // return redirect(`/app/authors/${authorId}`);
-};
+  // Otherwise, show the login page
+  return null;
+}
 
-// EditBook component
-export default function EditBook() {
-  const { book } = useLoaderData();
-  console.log('book->', book)
+// Action function to handle login
+export async function action({ request }) {
+  const formData = await request.formData();
+  const email = formData.get("email");
+  const password = formData.get("password");
 
-  const [formDetails, setFormDetails] = useState({
-    title: book.title,
-    description: book.description,
-    isbn: book.isbn,
-    publicationYear: book.release_date,
-    format: book.format,
-    authorId: book.authorId
-  })
+  try {
+    const response = await fetch("https://candidate-testing.api.royal-apps.io/api/v2/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
 
-  const handleOnChange = (newValue) => {
-    setFormDetails(prevState => ({
-      ...prevState,
-      [name]: newValue
-    }));
+    if (!response.ok) {
+      return json({ error: "Invalid credentials" }, { status: 401 });
+    }
+
+    const { token_key } = await response.json();
+
+    // Create a new session and store the token in the session
+    const session = await sessionStorage.getSession(
+      request.headers.get("Cookie")
+    );
+    session.set("token", token_key);
+
+    console.log("Token stored in session:", token_key); // Debugging: Log the token
+
+    // Redirect to the dashboard and set the session cookie
+    return redirect("/app", {
+      headers: {
+        "Set-Cookie": await sessionStorage.commitSession(session),
+      },
+    });
+  } catch (error) {
+    return json({ error: "Invalid credentials" }, { status: 401 });
+  }
+}
+
+// Login component
+export default function Login() {
+  const actionData = useActionData();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = () => {
+    console.log("Email:", email);
+    console.log("Password:", password);
   };
 
   return (
-    <Page title="Edit Book">
+    <Page title="Login">
       <Card sectioned>
         <Form method="post">
           <FormLayout>
-            {/* Title Field */}
+            {/* Display error message if login fails */}
+            {actionData?.error && (
+              <Banner status="critical">{actionData.error}</Banner>
+            )}
+
+            {/* Email Field */}
             <TextField
-              label="Title"
-              name="title"
-              value={formDetails.title}
-              onChange={handleOnChange}
-              defaultValue={book?.title}
-              autoComplete="off"
+              type="email"
+              name="email"
+              label="Email"
+              value={email}
+              onChange={(newValue) => setEmail(newValue)}
+              placeholder="Enter your email"
+              autoComplete="email"
               required
             />
 
-            {/* Description Field */}
+            {/* Password Field */}
             <TextField
-              label="Description"
-              name="description"
-              defaultValue={book?.description}
-              value={formDetails.description}
-              onChange={handleOnChange}
-              autoComplete="off"
-              required
-            />
-
-            {/* ISBN Field */}
-            <TextField
-              label="ISBN"
-              name="isbn"
-              defaultValue={book?.isbn}
-              value={formDetails.isbn}
-              onChange={handleOnChange}
-              autoComplete="off"
-              required
-            />
-
-            {/* Publication Year Field */}
-            <TextField
-              label="Publication Year"
-              name="publicationYear"
-              type="number"
-              // defaultValue={book?.release_date}
-              value={formDetails.release_date}
-              onChange={handleOnChange}
-              autoComplete="off"
-              required
-            />
-
-            {/* Format Field */}
-            <TextField
-              label="Format"
-              name="format"
-              defaultValue={book?.format}
-              value={formDetails.format}
-              onChange={handleOnChange}
-              autoComplete="off"
-              required
-            />
-
-            {/* Author ID Field */}
-            <TextField
-              label="Author ID"
-              name="authorId"
-              type="number"
-              value={formDetails.authorId}
-              onChange={handleOnChange}
-              defaultValue={book?.author?.id}
-              autoComplete="off"
+              type="password"
+              name="password"
+              label="Password"
+              value={password}
+              onChange={(newValue) => setPassword(newValue)}
+              placeholder="Enter your password"
+              autoComplete="current-password"
               required
             />
 
             {/* Submit Button */}
             <Button submit primary>
-              Update Book
+              Login
             </Button>
           </FormLayout>
         </Form>

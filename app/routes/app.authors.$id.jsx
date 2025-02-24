@@ -69,7 +69,7 @@ import {
           <Link url={`/app/book/edit/${book.id}`}>Edit</Link>
         </IndexTable.Cell>
         <IndexTable.Cell>
-          <Form method="post">
+          <Form method="delete">
             <input type="hidden" name="bookId" value={book.id} />
             <Button submit destructive>
               Delete

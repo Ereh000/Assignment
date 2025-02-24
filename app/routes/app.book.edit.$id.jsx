@@ -9,7 +9,7 @@ import {
 import { Form, useLoaderData } from "@remix-run/react";
 import { json, redirect } from "@remix-run/node";
 import { useState } from "react";
-import { title } from "process";
+// import { title } from "process";
 
 // Loader function to fetch book details
 export const loader = async ({ params }) => {
@@ -35,11 +35,11 @@ export const action = async ({ request, params }) => {
     headers: { "Content-Type": "application/json", Authorization: `Bearer e1ea929642a5215f004ce10e612e71722cec8022d5e6afca37af5c56442634e3768a11c9ce047765` },
     body: JSON.stringify({
       // author: { id: authorId },
-      title,
+      title: title,
       release_date: publicationYear,
-      description,
-      isbn,
-      format,
+      description: description,
+      isbn: isbn,
+      format: format,
     }),
   });
 
@@ -47,7 +47,7 @@ export const action = async ({ request, params }) => {
     return json({ error: "Failed to update book" }, { status: 500 });
   }
 
-  // return redirect(`/app/authors/1034`);    
+  // return redirect(`/app/authors/349`);
   return redirect(`/app/authors/${authorId}`);
 };
 
@@ -56,34 +56,46 @@ export default function EditBook() {
   const { book } = useLoaderData();
   console.log('book->', book)
 
-  const [formDetails, setFormDetails] = useState({
-    title: book.title,
-    description: book.description,
-    isbn: book.isbn,
-    publicationYear: book.release_date,
-    format: book.format,
-    authorId: book.id
-  })
+  // const [formDetails, setFormDetails] = useState({
+  //   title: book.title,
+  //   description: book.description,
+  //   isbn: book.isbn,
+  //   publicationYear: book.release_date,
+  //   format: book.format,
+  //   authorId: book.authorId
+  // })
+  const [title, setTitle] = useState(book.title);
+  const [description, setDescription] = useState(book.description);
+  const [isbn, setIsbn] = useState(book.isbn);
+  const [releaseDate, setReleaseDate] = useState(book.releaseDate);
+  const [format, setFormat] = useState(book.format);
+  const [authorId, setAuthorId] = useState(book.author.id);
 
-  const handleOnChange = (newValue) => {
-    setFormDetails(prevState => ({
-      ...prevState,
-      [name]: newValue
-    }));
-  };
+  // const handleOnChange = (newValue) => {
+  //   setFormDetails(prevState => ({
+  //     ...prevState,
+  //     [name]: newValue
+  //   }));
+  // };
 
   return (
     <Page title="Edit Book">
       <Card sectioned>
         <Form method="post">
           <FormLayout>
+
+            <input type="hidden" name="authorId"
+              value={authorId}
+              onChange={(newValue) => setAuthorId(newValue)}
+            />
+            
             {/* Title Field */}
             <TextField
               label="Title"
               name="title"
-              value={formDetails.title}
-              onChange={handleOnChange}
-              defaultValue={book?.title}
+              value={title}
+              onChange={(newValue) => setTitle(newValue)}
+              // defaultValue={book?.title}
               autoComplete="off"
               required
             />
@@ -92,9 +104,9 @@ export default function EditBook() {
             <TextField
               label="Description"
               name="description"
-              defaultValue={book?.description}
-              value={formDetails.description}
-              onChange={handleOnChange}
+              // defaultValue={book?.description}
+              value={description}
+              onChange={(newValue) => setDescription(newValue)}
               autoComplete="off"
               required
             />
@@ -103,9 +115,9 @@ export default function EditBook() {
             <TextField
               label="ISBN"
               name="isbn"
-              defaultValue={book?.isbn}
-              value={formDetails.isbn}
-              onChange={handleOnChange}
+              // defaultValue={book?.isbn}
+              value={isbn}
+              onChange={(newValue) => setIsbn(newValue)}
               autoComplete="off"
               required
             />
@@ -116,8 +128,8 @@ export default function EditBook() {
               name="publicationYear"
               type="number"
               // defaultValue={book?.release_date}
-              value={formDetails.release_date}
-              onChange={handleOnChange}
+              value={releaseDate}
+              onChange={(newValue) => setReleaseDate(newValue)}
               autoComplete="off"
               required
             />
@@ -126,21 +138,9 @@ export default function EditBook() {
             <TextField
               label="Format"
               name="format"
-              defaultValue={book?.format}
-              value={formDetails.format}
-              onChange={handleOnChange}
-              autoComplete="off"
-              required
-            />
-
-            {/* Author ID Field */}
-            <TextField
-              label="Author ID"
-              name="authorId"
-              type="number"
-              value={formDetails.authorId}
-              onChange={handleOnChange}
-              defaultValue={book?.author?.id}
+              // defaultValue={book?.format}
+              value={format}
+              onChange={(newValue) => setFormat(newValue)}
               autoComplete="off"
               required
             />
