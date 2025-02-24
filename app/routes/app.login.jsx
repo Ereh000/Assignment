@@ -41,7 +41,7 @@ import {
     }
   }
   
-  // Login component
+  // Login component -
   export default function Login() {
     const actionData = useActionData();
   
@@ -67,7 +67,7 @@ import {
               {/* Email Field */}
               <TextField
                 type="email"
-                name="email"
+                name="email"  
                 label="Email"
                 value={email}
                 onChange={(newValue) => setEmail(newValue)}
