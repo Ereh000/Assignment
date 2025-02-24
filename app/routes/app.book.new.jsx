@@ -33,7 +33,7 @@ export const action = async ({ request }) => {
                 "description": description,
                 "isbn": genre,
                 "format": format,
-                "number_of_pages": no_of_pages
+                "number_of_pages": 20
             }
         ),
     });
@@ -42,7 +42,7 @@ export const action = async ({ request }) => {
         return json({ error: "Failed to add book" }, { status: 500 });
     }
 
-    return redirect("/books");
+    return redirect("/app/author");
 };
 
 export default function AddBook() {

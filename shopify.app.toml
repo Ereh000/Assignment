@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "751c76337ab2ee9d74eb1f90a368dc95"
-application_url = "https://highlight-expert-newspapers-variables.trycloudflare.com"
+application_url = "https://latex-restricted-aka-baghdad.trycloudflare.com"
 embedded = true
 name = "assignment-app"
 handle = "assignment-app-7"
@@ -27,9 +27,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://highlight-expert-newspapers-variables.trycloudflare.com/auth/callback",
-  "https://highlight-expert-newspapers-variables.trycloudflare.com/auth/shopify/callback",
-  "https://highlight-expert-newspapers-variables.trycloudflare.com/api/auth/callback"
+  "https://latex-restricted-aka-baghdad.trycloudflare.com/auth/callback",
+  "https://latex-restricted-aka-baghdad.trycloudflare.com/auth/shopify/callback",
+  "https://latex-restricted-aka-baghdad.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
